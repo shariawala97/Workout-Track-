@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Workout Tracker</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #fafafa;
+            --bg-tertiary: #f5f5f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border-color: #e5e5e5;
+            --success-color: #22c55e;
+            --danger-color: #dc2626;
+            --danger-bg: #fee;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a3a3a3;
+            --text-tertiary: #737373;
+            --border-color: #2a2a2a;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --danger-bg: #2a1a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateY(-1px);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 24px;
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-danger {
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+            margin: 0;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Screen */
+        .hero-section {
+            padding: 32px 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .hero-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .stats-section {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .quick-actions-section {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .templates-section {
+            padding: 24px 0;
+        }
+
+        .template-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .template-card:hover {
+            background: var(--bg-tertiary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .template-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .template-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--text-secondary);
+            box-shadow: 0 0 0 3px rgba(102, 102, 102, 0.1);
+        }
+
+        /* Exercise Management */
+        .exercise-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .exercise-item input {
+            flex: 1;
+        }
+
+        .exercise-item input[type="number"] {
+            width: 100px;
+            flex: none;
+        }
+
+        .remove-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Workout Screen */
+        .workout-container {
+            padding-bottom: 120px;
+        }
+
+        .exercise-block {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .exercise-name {
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .last-workout-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+            padding: 6px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .sets-container {
+            margin-bottom: 16px;
+        }
+
+        .set-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr 80px 36px;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 14px;
+            padding: 8px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .set-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .set-input {
+            padding: 14px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .set-input:focus {
+            outline: none;
+            border-color: var(--text-secondary);
+            box-shadow: 0 0 0 3px rgba(102, 102, 102, 0.1);
+            transform: scale(1.02);
+        }
+
+        .set-input::placeholder {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Style number inputs */
+        .set-input[type="number"]::-webkit-inner-spin-button,
+        .set-input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .set-input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Make select (RPE) look better */
+        select.set-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            padding-right: 32px;
+        }
+
+        .set-complete {
+            color: var(--success-color);
+            font-size: 20px;
+            text-align: center;
+            width: 36px;
+        }
+
+        .add-set-btn {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .add-set-btn:hover {
+            background: var(--bg-primary);
+            transform: translateY(-1px);
+        }
+
+        .add-set-btn:active {
+            transform: translateY(0);
+        }
+
+        /* History */
+        .history-item {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .history-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .history-stats {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .history-details {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .history-details.show {
+            display: block;
+        }
+
+        .exercise-detail {
+            margin-bottom: 16px;
+        }
+
+        .exercise-detail-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .set-detail {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-left: 16px;
+            line-height: 1.8;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .empty-text {
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border: none;
+            border-radius: 6px;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+        }
+
+        /* Fixed Footer */
+        .fixed-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            padding: 16px;
+            display: none;
+            z-index: 99;
+        }
+
+        .fixed-footer.active {
+            display: block;
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .set-row {
+                grid-template-columns: 45px 1fr 1fr 70px 32px;
+                gap: 6px;
+                padding: 10px 6px;
+            }
+            
+            .set-input {
+                padding: 12px 6px;
+                font-size: 15px;
+            }
+            
+            .set-label {
+                font-size: 12px;
+            }
+            
+            select.set-input {
+                padding-right: 24px;
+                background-size: 14px;
+                background-position: right 6px center;
+            }
+            
+            .exercise-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .last-workout-info {
+                align-self: flex-start;
+            }
+        }
+        
+        /* Labels for inputs */
+        .input-labels {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr 80px 36px;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 0 8px;
+            align-items: center;
+        }
+        
+        .input-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+            text-align: center;
+        }
+        
+        @media (max-width: 480px) {
+            .input-labels {
+                grid-template-columns: 45px 1fr 1fr 70px 32px;
+                gap: 6px;
+                padding: 0 6px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Home Screen -->
+    <div id="homeScreen" class="screen active">
+        <div class="header">
+            <div class="header-title">Workout Tracker</div>
+            <div class="header-actions">
+                <button class="nav-btn" onclick="showScreen('templatesScreen')">Templates</button>
+                <button class="nav-btn theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="hero-section">
+                <div class="hero-title" id="greeting">Welcome Back</div>
+                <div class="hero-subtitle" id="dateDisplay"></div>
+            </div>
+
+            <div class="stats-section">
+                <div class="section-title">Recent Personal Records</div>
+                <div id="recentPRs">
+                    <div class="empty-state" style="padding: 40px 20px;">
+                        <div class="empty-icon">🏆</div>
+                        <div class="empty-title">No PRs Yet</div>
+                        <div class="empty-text">Complete workouts to track your personal records</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions-section">
+                <div class="section-title">Quick Actions</div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="showScreen('historyScreen')">View History</button>
+                    <button class="btn btn-secondary" onclick="openExportModal()">Export Data</button>
+                </div>
+            </div>
+
+            <div class="templates-section">
+                <div class="section-title">Start Workout</div>
+                <div id="templatesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Screen -->
+    <div id="templatesScreen" class="screen">
+        <div class="header">
+            <div class="header-title">Templates</div>
+            <div class="header-actions">
+                <button class="nav-btn" onclick="showScreen('homeScreen')">← Back</button>
+                <button class="nav-btn" onclick="openTemplateModal()">+ New</button>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div id="templatesManageList"></div>
+        </div>
+    </div>
+
+    <!-- Workout Screen -->
+    <div id="workoutScreen" class="screen">
+        <div class="header">
+            <div class="header-title" id="workoutTitle">Workout</div>
+            <div class="header-actions">
+                <button class="nav-btn" onclick="cancelWorkout()">← Back</button>
+            </div>
+        </div>
+        
+        <div class="container workout-container">
+            <div id="workoutExercises"></div>
+        </div>
+
+        <div class="fixed-footer active">
+            <div class="footer-content">
+                <button class="btn btn-secondary" onclick="cancelWorkout()">← Back</button>
+                <button class="btn" onclick="finishWorkout()">Finish Workout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Screen -->
+    <div id="historyScreen" class="screen">
+        <div class="header">
+            <div class="header-title">History</div>
+            <div class="header-actions">
+                <button class="nav-btn" onclick="showScreen('homeScreen')">← Back</button>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+                <button class="btn btn-secondary" onclick="exportJSON()">Export JSON</button>
+            </div>
+            
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- Template Modal -->
+    <div id="templateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">New Template</div>
+                <button class="modal-close" onclick="closeTemplateModal()">×</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Template Name</label>
+                <input type="text" class="form-input" id="templateName" placeholder="e.g., Full Body A">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Exercises</label>
+                <div id="exercisesList"></div>
+                <button class="add-set-btn" onclick="addExerciseInput()">+ Add Exercise</button>
+            </div>
+
+            <button class="btn" onclick="saveTemplate()">Save Template</button>
+            <button class="btn btn-secondary" onclick="closeTemplateModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Export Data</div>
+                <button class="modal-close" onclick="closeExportModal()">×</button>
+            </div>
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">Choose your export format:</p>
+            <button class="btn btn-secondary" onclick="exportCSV(); closeExportModal();">Export as CSV</button>
+            <button class="btn btn-secondary" onclick="exportJSON(); closeExportModal();">Export as JSON</button>
+            <button class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <div class="modal-title">Confirm Delete</div>
+                <button class="modal-close" onclick="closeDeleteModal()">×</button>
+            </div>
+            <p id="deleteMessage" style="margin-bottom: 20px; color: var(--text-secondary);">Are you sure you want to delete this?</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Workout Modal -->
+    <div id="editWorkoutModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <div class="modal-title">Edit Workout</div>
+                <button class="modal-close" onclick="closeEditWorkoutModal()">×</button>
+            </div>
+            <div id="editWorkoutContent"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeEditWorkoutModal()">Cancel</button>
+                <button class="btn" onclick="saveEditedWorkout()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize IndexedDB
+        let db;
+        const DB_NAME = 'WorkoutTrackerDB';
+        const DB_VERSION = 1;
+
+        // State
+        let templates = [];
+        let workouts = [];
+        let currentTemplate = null;
+        let currentWorkout = null;
+        let editingTemplateId = null;
+        let pendingDeleteType = null;
+        let pendingDeleteId = null;
+        let editingWorkout = null;
+
+        // Initialize database
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    
+                    if (!db.objectStoreNames.contains('templates')) {
+                        const templateStore = db.createObjectStore('templates', { 
+                            keyPath: 'id', 
+                            autoIncrement: true 
+                        });
+                    }
+                    
+                    if (!db.objectStoreNames.contains('workouts')) {
+                        const workoutStore = db.createObjectStore('workouts', { 
+                            keyPath: 'id', 
+                            autoIncrement: true 
+                        });
+                        workoutStore.createIndex('date', 'date', { unique: false });
+                        workoutStore.createIndex('templateId', 'templateId', { unique: false });
+                    }
+                };
+            });
+        }
+
+        // Database operations
+        async function loadTemplates() {
+            const transaction = db.transaction(['templates'], 'readonly');
+            const store = transaction.objectStore('templates');
+            const request = store.getAll();
+            
+            return new Promise((resolve) => {
+                request.onsuccess = () => {
+                    templates = request.result || [];
+                    resolve(templates);
+                };
+            });
+        }
+
+        async function loadWorkouts() {
+            const transaction = db.transaction(['workouts'], 'readonly');
+            const store = transaction.objectStore('workouts');
+            const request = store.getAll();
+            
+            return new Promise((resolve) => {
+                request.onsuccess = () => {
+                    workouts = (request.result || []).sort((a, b) => b.id - a.id);
+                    resolve(workouts);
+                };
+            });
+        }
+
+        async function saveTemplateDB(template) {
+            const transaction = db.transaction(['templates'], 'readwrite');
+            const store = transaction.objectStore('templates');
+            
+            if (template.id) {
+                store.put(template);
+            } else {
+                store.add(template);
+            }
+            
+            return new Promise((resolve, reject) => {
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            });
+        }
+
+        async function deleteTemplateDB(id) {
+            const numId = Number(id);
+            const transaction = db.transaction(['templates'], 'readwrite');
+            const store = transaction.objectStore('templates');
+            
+            return new Promise((resolve, reject) => {
+                const request = store.delete(numId);
+                request.onsuccess = () => {
+                    console.log('Template deleted successfully');
+                    resolve();
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function saveWorkoutDB(workout) {
+            const transaction = db.transaction(['workouts'], 'readwrite');
+            const store = transaction.objectStore('workouts');
+            
+            if (workout.id) {
+                store.put(workout);
+            } else {
+                store.add(workout);
+            }
+            
+            return new Promise((resolve, reject) => {
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            });
+        }
+
+        async function deleteWorkoutDB(id) {
+            const numId = Number(id);
+            const transaction = db.transaction(['workouts'], 'readwrite');
+            const store = transaction.objectStore('workouts');
+            
+            return new Promise((resolve, reject) => {
+                const request = store.delete(numId);
+                request.onsuccess = () => {
+                    console.log('Workout deleted successfully');
+                    resolve();
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Delete Modal Functions
+        function openDeleteModal(type, id) {
+            console.log('Opening delete modal:', type, id);
+            pendingDeleteType = type;
+            pendingDeleteId = id;
+            
+            const message = type === 'workout' 
+                ? 'Are you sure you want to delete this workout? This cannot be undone.'
+                : 'Are you sure you want to delete this template? This cannot be undone.';
+            
+            document.getElementById('deleteMessage').textContent = message;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            pendingDeleteType = null;
+            pendingDeleteId = null;
+        }
+
+        async function confirmDelete() {
+            if (!pendingDeleteType || !pendingDeleteId) return;
+            
+            try {
+                if (pendingDeleteType === 'workout') {
+                    await deleteWorkoutDB(pendingDeleteId);
+                    await updateHistory();
+                    await updateHome();
+                } else if (pendingDeleteType === 'template') {
+                    await deleteTemplateDB(pendingDeleteId);
+                    await updateTemplatesScreen();
+                }
+                closeDeleteModal();
+            } catch (error) {
+                console.error('Delete failed:', error);
+                alert('Failed to delete. Please try again.');
+            }
+        }
+
+        // Edit Workout Functions
+        function openEditWorkoutModal(workoutId) {
+            const workout = workouts.find(w => w.id === workoutId);
+            if (!workout) {
+                alert('Workout not found');
+                return;
+            }
+            
+            editingWorkout = JSON.parse(JSON.stringify(workout));
+            renderEditWorkoutModal();
+            document.getElementById('editWorkoutModal').classList.add('active');
+        }
+
+        function renderEditWorkoutModal() {
+            const content = document.getElementById('editWorkoutContent');
+            content.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="editWorkoutDate" value="${editingWorkout.date}">
+                </div>
+                <div id="editExercisesList">
+                    ${editingWorkout.exercises.map((exercise, exIndex) => `
+                        <div class="exercise-block">
+                            <div class="exercise-header">
+                                <div class="exercise-name">${escapeHtml(exercise.name)}</div>
+                                <button class="btn btn-danger btn-small" onclick="removeExerciseFromEdit(${exIndex})">Remove</button>
+                            </div>
+                            <div id="edit-exercise-${exIndex}-sets">
+                                ${exercise.sets.map((set, setIndex) => `
+                                    <div class="set-row">
+                                        <div class="set-label">Set ${setIndex + 1}</div>
+                                        <input type="number" class="set-input" value="${set.weight}" 
+                                               onchange="updateEditSet(${exIndex}, ${setIndex}, 'weight', this.value)"
+                                               placeholder="Weight" min="0" step="any">
+                                        <input type="number" class="set-input" value="${set.reps}" 
+                                               onchange="updateEditSet(${exIndex}, ${setIndex}, 'reps', this.value)"
+                                               placeholder="Reps" min="0">
+                                        <select class="set-input" onchange="updateEditSet(${exIndex}, ${setIndex}, 'rpe', this.value)">
+                                            <option value="">RPE</option>
+                                            ${[...Array(10)].map((_, i) => `
+                                                <option value="${i+1}" ${set.rpe == i+1 ? 'selected' : ''}>${i+1}</option>
+                                            `).join('')}
+                                        </select>
+                                        <button class="remove-btn" onclick="removeSetFromEdit(${exIndex}, ${setIndex})">×</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="add-set-btn" onclick="addSetToEdit(${exIndex})">+ Add Set</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function closeEditWorkoutModal() {
+            document.getElementById('editWorkoutModal').classList.remove('active');
+            editingWorkout = null;
+        }
+
+        function updateEditSet(exerciseIndex, setIndex, field, value) {
+            if (field === 'weight' || field === 'reps') {
+                value = value === '' ? 0 : parseFloat(value) || 0;
+            }
+            editingWorkout.exercises[exerciseIndex].sets[setIndex][field] = value;
+        }
+
+        function removeSetFromEdit(exerciseIndex, setIndex) {
+            editingWorkout.exercises[exerciseIndex].sets.splice(setIndex, 1);
+            renderEditWorkoutModal();
+        }
+
+        function addSetToEdit(exerciseIndex) {
+            const lastSet = editingWorkout.exercises[exerciseIndex].sets.slice(-1)[0];
+            editingWorkout.exercises[exerciseIndex].sets.push({
+                weight: lastSet ? lastSet.weight : 0,
+                reps: lastSet ? lastSet.reps : 0,
+                rpe: null
+            });
+            renderEditWorkoutModal();
+        }
+
+        function removeExerciseFromEdit(exerciseIndex) {
+            if (editingWorkout.exercises.length === 1) {
+                alert('Workout must have at least one exercise');
+                return;
+            }
+            editingWorkout.exercises.splice(exerciseIndex, 1);
+            renderEditWorkoutModal();
+        }
+
+        async function saveEditedWorkout() {
+            if (!editingWorkout) return;
+            
+            editingWorkout.date = document.getElementById('editWorkoutDate').value;
+            
+            // Clean up empty sets
+            editingWorkout.exercises.forEach(ex => {
+                ex.sets = ex.sets.filter(set => set.weight > 0 || set.reps > 0);
+            });
+            
+            // Remove exercises with no sets
+            editingWorkout.exercises = editingWorkout.exercises.filter(ex => ex.sets.length > 0);
+            
+            if (editingWorkout.exercises.length === 0) {
+                alert('Workout must have at least one exercise with one set');
+                return;
+            }
+
+            try {
+                await saveWorkoutDB(editingWorkout);
+                closeEditWorkoutModal();
+                await updateHistory();
+                await updateHome();
+            } catch (error) {
+                console.error('Failed to update workout:', error);
+                alert('Failed to update workout. Please try again.');
+            }
+        }
+
+        // Theme management
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            document.getElementById('themeBtn').textContent = newTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeBtn').textContent = savedTheme === 'light' ? '🌙' : '☀️';
+        }
+
+        // UI Functions
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            
+            // Hide workout footer for non-workout screens
+            document.querySelector('.fixed-footer').classList.toggle('active', screenId === 'workoutScreen');
+            
+            if (screenId === 'homeScreen') {
+                updateHome();
+            } else if (screenId === 'templatesScreen') {
+                updateTemplatesScreen();
+            } else if (screenId === 'historyScreen') {
+                updateHistory();
+            }
+        }
+
+        async function updateHome() {
+            await loadTemplates();
+            await loadWorkouts();
+            
+            // Update date and greeting
+            const now = new Date();
+            const hour = now.getHours();
+            let greeting = 'Welcome Back';
+            if (hour < 12) greeting = 'Good Morning';
+            else if (hour < 17) greeting = 'Good Afternoon';
+            else greeting = 'Good Evening';
+            
+            document.getElementById('greeting').textContent = greeting;
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Calculate Recent PRs
+            const prsContainer = document.getElementById('recentPRs');
+            const exercisePRs = {};
+            
+            workouts.forEach(workout => {
+                workout.exercises.forEach(exercise => {
+                    exercise.sets.forEach(set => {
+                        const volume = set.weight * set.reps;
+                        const key = exercise.name;
+                        
+                        if (!exercisePRs[key] || volume > exercisePRs[key].volume) {
+                            exercisePRs[key] = {
+                                weight: set.weight,
+                                reps: set.reps,
+                                volume: volume,
+                                date: workout.date,
+                                workoutId: workout.id
+                            };
+                        }
+                    });
+                });
+            });
+            
+            const prsList = Object.entries(exercisePRs)
+                .map(([name, pr]) => ({ name, ...pr }))
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+            
+            if (prsList.length > 0) {
+                prsContainer.innerHTML = `
+                    <div style="display: grid; gap: 12px;">
+                        ${prsList.map(pr => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; 
+                                        padding: 12px; background: var(--bg-secondary); border-radius: 8px; 
+                                        border: 1px solid var(--border-color);">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
+                                        ${escapeHtml(pr.name)}
+                                    </div>
+                                    <div style="font-size: 12px; color: var(--text-secondary);">
+                                        ${formatDate(pr.date)}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 18px; font-weight: 700; color: var(--success-color);">
+                                        ${pr.weight} × ${pr.reps}
+                                    </div>
+                                    <div style="font-size: 11px; color: var(--text-secondary);">
+                                        ${pr.volume.toLocaleString()} lbs total
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                prsContainer.innerHTML = `
+                    <div class="empty-state" style="padding: 40px 20px;">
+                        <div class="empty-icon">🏆</div>
+                        <div class="empty-title">No PRs Yet</div>
+                        <div class="empty-text">Complete workouts to track your personal records</div>
+                    </div>
+                `;
+            }
+            
+            // Update templates list
+            const list = document.getElementById('templatesList');
+            if (templates.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-title">No Templates Yet</div>
+                        <div class="empty-text">Create your first workout template to get started</div>
+                        <button class="btn" onclick="showScreen('templatesScreen')">Create Template</button>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = templates.map(template => `
+                    <div class="template-card" onclick="startWorkout(${template.id})">
+                        <div class="template-title">${escapeHtml(template.name)}</div>
+                        <div class="template-info">
+                            ${template.exercises.length} exercises • 
+                            ${template.exercises.reduce((sum, ex) => sum + ex.targetSets, 0)} total sets
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function updateTemplatesScreen() {
+            await loadTemplates();
+            
+            const list = document.getElementById('templatesManageList');
+            if (templates.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-title">No Templates</div>
+                        <div class="empty-text">Create your first workout template</div>
+                        <button class="btn" onclick="openTemplateModal()">Create Template</button>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = templates.map(template => `
+                    <div class="template-card">
+                        <div class="template-title">${escapeHtml(template.name)}</div>
+                        <div class="template-info">
+                            ${template.exercises.map(ex => `${escapeHtml(ex.name)} (${ex.targetSets} sets)`).join(', ')}
+                        </div>
+                        <div style="margin-top: 16px; display: flex; gap: 8px;">
+                            <button class="btn btn-secondary btn-small" onclick="editTemplate(${template.id})">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="openDeleteModal('template', ${template.id})">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function updateHistory() {
+            await loadWorkouts();
+            await loadTemplates();
+            
+            const list = document.getElementById('historyList');
+            if (workouts.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <div class="empty-title">No Workouts Yet</div>
+                        <div class="empty-text">Complete your first workout to see it here</div>
+                        <button class="btn" onclick="showScreen('homeScreen')">Start Workout</button>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = workouts.map(workout => {
+                    const template = templates.find(t => t.id === workout.templateId);
+                    const totalSets = workout.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+                    const totalVolume = workout.exercises.reduce((sum, ex) => 
+                        sum + ex.sets.reduce((setSum, set) => setSum + (set.weight * set.reps), 0), 0
+                    );
+                    
+                    return `
+                        <div class="history-item">
+                            <div class="history-header">
+                                <div class="history-title">${template ? escapeHtml(template.name) : 'Unknown'}</div>
+                                <div class="history-date">${formatDate(workout.date)}</div>
+                            </div>
+                            <div class="history-stats">
+                                ${workout.exercises.length} exercises • ${totalSets} sets • ${totalVolume.toLocaleString()} lbs
+                            </div>
+                            <button class="btn btn-secondary btn-small" onclick="toggleDetails(${workout.id})">
+                                <span id="toggle-text-${workout.id}">View Details</span>
+                            </button>
+                            <div id="details-${workout.id}" class="history-details">
+                                ${workout.exercises.map(ex => `
+                                    <div class="exercise-detail">
+                                        <div class="exercise-detail-name">${escapeHtml(ex.name)}</div>
+                                        ${ex.sets.map((set, i) => `
+                                            <div class="set-detail">
+                                                Set ${i+1}: ${set.weight} lbs × ${set.reps} reps ${set.rpe ? `@ RPE ${set.rpe}` : ''}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 8px;">
+                                <button class="btn btn-secondary btn-small" onclick="openEditWorkoutModal(${workout.id})">
+                                    Edit
+                                </button>
+                                <button class="btn btn-danger btn-small" onclick="openDeleteModal('workout', ${workout.id})">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function toggleDetails(workoutId) {
+            const details = document.getElementById(`details-${workoutId}`);
+            const toggleText = document.getElementById(`toggle-text-${workoutId}`);
+            details.classList.toggle('show');
+            toggleText.textContent = details.classList.contains('show') ? 'Hide Details' : 'View Details';
+        }
+
+        // Template Modal Functions
+        function openTemplateModal(templateId = null) {
+            editingTemplateId = templateId;
+            const modal = document.getElementById('templateModal');
+            const title = document.getElementById('modalTitle');
+            const nameInput = document.getElementById('templateName');
+            const exercisesList = document.getElementById('exercisesList');
+            
+            if (templateId) {
+                const template = templates.find(t => t.id === templateId);
+                title.textContent = 'Edit Template';
+                nameInput.value = template.name;
+                exercisesList.innerHTML = template.exercises.map((ex, i) => `
+                    <div class="exercise-item">
+                        <input type="text" class="form-input" placeholder="Exercise name" value="${escapeHtml(ex.name)}" data-index="${i}">
+                        <input type="number" class="form-input" placeholder="Sets" value="${ex.targetSets}" min="1" max="10" data-index="${i}">
+                        <button class="remove-btn" onclick="removeExerciseInput(this)">×</button>
+                    </div>
+                `).join('');
+            } else {
+                title.textContent = 'New Template';
+                nameInput.value = '';
+                exercisesList.innerHTML = `
+                    <div class="exercise-item">
+                        <input type="text" class="form-input" placeholder="Exercise name" data-index="0">
+                        <input type="number" class="form-input" placeholder="Sets" value="3" min="1" max="10" data-index="0">
+                        <button class="remove-btn" onclick="removeExerciseInput(this)">×</button>
+                    </div>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeTemplateModal() {
+            document.getElementById('templateModal').classList.remove('active');
+            editingTemplateId = null;
+        }
+
+        function addExerciseInput() {
+            const exercisesList = document.getElementById('exercisesList');
+            const index = exercisesList.children.length;
+            const div = document.createElement('div');
+            div.className = 'exercise-item';
+            div.innerHTML = `
+                <input type="text" class="form-input" placeholder="Exercise name" data-index="${index}">
+                <input type="number" class="form-input" placeholder="Sets" value="3" min="1" max="10" data-index="${index}">
+                <button class="remove-btn" onclick="removeExerciseInput(this)">×</button>
+            `;
+            exercisesList.appendChild(div);
+        }
+
+        function removeExerciseInput(button) {
+            const exercisesList = document.getElementById('exercisesList');
+            if (exercisesList.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('You must have at least one exercise');
+            }
+        }
+
+        async function saveTemplate() {
+            const name = document.getElementById('templateName').value.trim();
+            if (!name) {
+                alert('Please enter a template name');
+                return;
+            }
+            
+            const exerciseItems = document.querySelectorAll('#exercisesList .exercise-item');
+            const exercises = [];
+            
+            exerciseItems.forEach(item => {
+                const nameInput = item.querySelector('input[type="text"]');
+                const setsInput = item.querySelector('input[type="number"]');
+                if (nameInput.value.trim()) {
+                    exercises.push({
+                        name: nameInput.value.trim(),
+                        targetSets: Math.max(1, Math.min(10, parseInt(setsInput.value) || 3))
+                    });
+                }
+            });
+            
+            if (exercises.length === 0) {
+                alert('Please add at least one exercise');
+                return;
+            }
+            
+            const template = {
+                name,
+                exercises,
+                createdAt: Date.now()
+            };
+            
+            if (editingTemplateId) {
+                template.id = editingTemplateId;
+            }
+            
+            try {
+                await saveTemplateDB(template);
+                closeTemplateModal();
+                await updateTemplatesScreen();
+                await updateHome();
+            } catch (error) {
+                console.error('Error saving template:', error);
+                alert('Failed to save template. Please try again.');
+            }
+        }
+
+        async function editTemplate(id) {
+            openTemplateModal(id);
+        }
+
+        // Workout Functions
+        async function startWorkout(templateId) {
+            currentTemplate = templates.find(t => t.id === templateId);
+            if (!currentTemplate) return;
+            
+            const templateWorkouts = workouts.filter(w => w.templateId === templateId);
+            const lastWorkout = templateWorkouts.length > 0 ? templateWorkouts[0] : null;
+            
+            currentWorkout = {
+                templateId,
+                date: new Date().toISOString().split('T')[0],
+                exercises: currentTemplate.exercises.map(ex => ({
+                    name: ex.name,
+                    sets: Array(ex.targetSets).fill(null).map(() => ({
+                        weight: '',
+                        reps: '',
+                        rpe: ''
+                    }))
+                }))
+            };
+            
+            document.getElementById('workoutTitle').textContent = currentTemplate.name;
+            
+            const container = document.getElementById('workoutExercises');
+            container.innerHTML = currentWorkout.exercises.map((exercise, exIndex) => {
+                const lastExercise = lastWorkout ? lastWorkout.exercises.find(e => e.name === exercise.name) : null;
+                
+                let bestSet = null;
+                if (lastExercise && lastExercise.sets.length > 0) {
+                    bestSet = lastExercise.sets.reduce((best, set) => {
+                        const volume = set.weight * set.reps;
+                        const bestVolume = best ? best.weight * best.reps : 0;
+                        return volume > bestVolume ? set : best;
+                    }, null);
+                }
+                
+                return `
+                    <div class="exercise-block">
+                        <div class="exercise-header">
+                            <div class="exercise-name">${escapeHtml(exercise.name)}</div>
+                            ${bestSet ? `<div class="last-workout-info">Last: ${bestSet.weight} lbs × ${bestSet.reps}</div>` : ''}
+                        </div>
+                        <div class="input-labels">
+                            <div class="input-label">SET</div>
+                            <div class="input-label">WEIGHT</div>
+                            <div class="input-label">REPS</div>
+                            <div class="input-label">RPE</div>
+                            <div class="input-label">✓</div>
+                        </div>
+                        <div class="sets-container" id="exercise-${exIndex}-sets">
+                            ${exercise.sets.map((set, setIndex) => `
+                                <div class="set-row">
+                                    <div class="set-label">${setIndex + 1}</div>
+                                    <input type="number" class="set-input" placeholder="${bestSet ? bestSet.weight : '0'}" 
+                                           oninput="updateSet(${exIndex}, ${setIndex}, 'weight', this.value)" 
+                                           inputmode="decimal" min="0" step="any">
+                                    <input type="number" class="set-input" placeholder="${bestSet ? bestSet.reps : '0'}" 
+                                           oninput="updateSet(${exIndex}, ${setIndex}, 'reps', this.value)" 
+                                           inputmode="numeric" min="0">
+                                    <select class="set-input" onchange="updateSet(${exIndex}, ${setIndex}, 'rpe', this.value)">
+                                        <option value="">-</option>
+                                        ${[...Array(10)].map((_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                                    </select>
+                                    <div class="set-complete" id="check-${exIndex}-${setIndex}"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="add-set-btn" onclick="addSet(${exIndex})">+ Add Set</button>
+                    </div>
+                `;
+            }).join('');
+            
+            showScreen('workoutScreen');
+        }
+
+        function updateSet(exerciseIndex, setIndex, field, value) {
+            if (field === 'weight' || field === 'reps') {
+                value = value === '' ? '' : Math.max(0, parseFloat(value) || 0);
+            }
+            currentWorkout.exercises[exerciseIndex].sets[setIndex][field] = value;
+            
+            const set = currentWorkout.exercises[exerciseIndex].sets[setIndex];
+            const checkmark = document.getElementById(`check-${exerciseIndex}-${setIndex}`);
+            if (set.weight && set.reps && set.weight !== '' && set.reps !== '') {
+                checkmark.textContent = '✓';
+            } else {
+                checkmark.textContent = '';
+            }
+        }
+
+        function addSet(exerciseIndex) {
+            currentWorkout.exercises[exerciseIndex].sets.push({
+                weight: '',
+                reps: '',
+                rpe: ''
+            });
+            
+            const setIndex = currentWorkout.exercises[exerciseIndex].sets.length - 1;
+            const container = document.getElementById(`exercise-${exerciseIndex}-sets`);
+            const div = document.createElement('div');
+            div.className = 'set-row';
+            
+            const lastSet = setIndex > 0 ? currentWorkout.exercises[exerciseIndex].sets[setIndex - 1] : null;
+            
+            div.innerHTML = `
+                <div class="set-label">${setIndex + 1}</div>
+                <input type="number" class="set-input" placeholder="${lastSet && lastSet.weight ? lastSet.weight : '0'}" 
+                       oninput="updateSet(${exerciseIndex}, ${setIndex}, 'weight', this.value)" 
+                       inputmode="decimal" min="0" step="any">
+                <input type="number" class="set-input" placeholder="${lastSet && lastSet.reps ? lastSet.reps : '0'}" 
+                       oninput="updateSet(${exerciseIndex}, ${setIndex}, 'reps', this.value)" 
+                       inputmode="numeric" min="0">
+                <select class="set-input" onchange="updateSet(${exerciseIndex}, ${setIndex}, 'rpe', this.value)">
+                    <option value="">-</option>
+                    ${[...Array(10)].map((_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                </select>
+                <div class="set-complete" id="check-${exerciseIndex}-${setIndex}"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function cancelWorkout() {
+            let hasData = false;
+            if (currentWorkout) {
+                for (let exercise of currentWorkout.exercises) {
+                    for (let set of exercise.sets) {
+                        if (set.weight || set.reps || set.rpe) {
+                            hasData = true;
+                            break;
+                        }
+                    }
+                    if (hasData) break;
+                }
+            }
+            
+            if (hasData) {
+                openDeleteModal('cancelWorkout', null);
+            } else {
+                currentWorkout = null;
+                currentTemplate = null;
+                showScreen('homeScreen');
+            }
+        }
+
+        async function finishWorkout() {
+            const completedExercises = currentWorkout.exercises
+                .map(ex => ({
+                    name: ex.name,
+                    sets: ex.sets
+                        .filter(set => set.weight && set.reps && set.weight !== '' && set.reps !== '')
+                        .map(set => ({
+                            weight: parseFloat(set.weight) || 0,
+                            reps: parseInt(set.reps) || 0,
+                            rpe: parseInt(set.rpe) || null
+                        }))
+                }))
+                .filter(ex => ex.sets.length > 0);
+            
+            if (completedExercises.length === 0) {
+                alert('Please complete at least one set before finishing');
+                return;
+            }
+            
+            const workout = {
+                templateId: currentWorkout.templateId,
+                date: currentWorkout.date,
+                exercises: completedExercises,
+                completedAt: Date.now()
+            };
+            
+            try {
+                await saveWorkoutDB(workout);
+                alert('Workout saved! 💪');
+                currentWorkout = null;
+                currentTemplate = null;
+                showScreen('homeScreen');
+            } catch (error) {
+                console.error('Error saving workout:', error);
+                alert('Failed to save workout. Please try again.');
+            }
+        }
+
+        // Export Functions
+        function openExportModal() {
+            document.getElementById('exportModal').classList.add('active');
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        async function exportCSV() {
+            await loadWorkouts();
+            await loadTemplates();
+            
+            if (workouts.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const rows = [
+                ['Date', 'Workout', 'Exercise', 'Set', 'Weight', 'Reps', 'RPE', 'Volume']
+            ];
+            
+            workouts.forEach(workout => {
+                const template = templates.find(t => t.id === workout.templateId);
+                const templateName = template ? template.name : 'Unknown';
+                
+                workout.exercises.forEach(exercise => {
+                    exercise.sets.forEach((set, index) => {
+                        rows.push([
+                            workout.date,
+                            templateName,
+                            exercise.name,
+                            index + 1,
+                            set.weight || 0,
+                            set.reps || 0,
+                            set.rpe || '',
+                            (set.weight || 0) * (set.reps || 0)
+                        ]);
+                    });
+                });
+            });
+            
+            const csv = rows.map(row => row.map(cell => 
+                typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+            ).join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `workout-data-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function exportJSON() {
+            await loadWorkouts();
+            await loadTemplates();
+            
+            if (workouts.length === 0 && templates.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const data = {
+                templates,
+                workouts,
+                exportDate: new Date().toISOString()
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `workout-data-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+        }
+
+        // Make functions globally accessible
+        window.showScreen = showScreen;
+        window.toggleTheme = toggleTheme;
+        window.openTemplateModal = openTemplateModal;
+        window.closeTemplateModal = closeTemplateModal;
+        window.openExportModal = openExportModal;
+        window.closeExportModal = closeExportModal;
+        window.openDeleteModal = openDeleteModal;
+        window.closeDeleteModal = closeDeleteModal;
+        window.confirmDelete = confirmDelete;
+        window.openEditWorkoutModal = openEditWorkoutModal;
+        window.closeEditWorkoutModal = closeEditWorkoutModal;
+        window.saveEditedWorkout = saveEditedWorkout;
+        window.updateEditSet = updateEditSet;
+        window.removeSetFromEdit = removeSetFromEdit;
+        window.addSetToEdit = addSetToEdit;
+        window.removeExerciseFromEdit = removeExerciseFromEdit;
+        window.startWorkout = startWorkout;
+        window.editTemplate = editTemplate;
+        window.toggleDetails = toggleDetails;
+        window.removeExerciseInput = removeExerciseInput;
+        window.addExerciseInput = addExerciseInput;
+        window.saveTemplate = saveTemplate;
+        window.cancelWorkout = cancelWorkout;
+        window.finishWorkout = finishWorkout;
+        window.updateSet = updateSet;
+        window.addSet = addSet;
+        window.exportCSV = exportCSV;
+        window.exportJSON = exportJSON;
+
+        // Initialize app
+        window.addEventListener('DOMContentLoaded', async () => {
+            loadTheme();
+            try {
+                await initDB();
+                await updateHome();
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                alert('Failed to initialize app. Please refresh the page.');
+            }
+        });
+
+        // Prevent accidental navigation
+        window.addEventListener('beforeunload', (e) => {
+            if (currentWorkout) {
+                let hasData = false;
+                for (let exercise of currentWorkout.exercises) {
+                    for (let set of exercise.sets) {
+                        if (set.weight || set.reps) {
+                            hasData = true;
+                            break;
+                        }
+                    }
+                    if (hasData) break;
+                }
+                
+                if (hasData) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
